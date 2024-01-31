@@ -6,18 +6,18 @@ static void MX_GPIO_Init(void);
 
 int main(void)
 {
-    HAL_Init();
+    InitializeHardware();
+
     SystemClock_Config();
     MX_GPIO_Init();
-
-    __disable_irq();
 
     TimInit();
     UARTInit();
 
     while (1)
     {
-      TimUpdate();
+        BootStateMachine();
+        TimUpdate();
     }
 }
 
@@ -70,8 +70,4 @@ static void MX_GPIO_Init(void) {
 void Error_Handler(void) {
     __disable_irq();
     while (1) {}
-}
-
-void SysTick_Handler(void) {
-    HAL_IncTick();
 }

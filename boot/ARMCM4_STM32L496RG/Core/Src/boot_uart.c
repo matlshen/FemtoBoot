@@ -1,4 +1,5 @@
 #include "boot_config.h"
+#include "tim.h"
 
 #include "stm32l4xx.h"
 #include "stm32l4xx_ll_crs.h"
@@ -94,27 +95,19 @@ void UARTInit(void) {
     LL_USART_Enable(USART2);
 }
 
-void UARTTransmitPacket(uint16_t msg_id, uint8_t *data, size_t length) {
-    LL_USART_TransmitData8(UARTx, (msg_id >> 0) & 0xFF);
-    LL_USART_TransmitData8(UARTx, (msg_id >> 8) & 0xFF);
-    LL_USART_TransmitData8(UARTx, (length >> 0) & 0xFF);
+void UARTTransmit(uint8_t *data, size_t length) {
     for (size_t i = 0; i < length; i++) {
+        while (!LL_USART_IsActiveFlag_TXE(UARTx));
         LL_USART_TransmitData8(UARTx, data[i]);
     }
 }
 
-void UARTReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length) {
-    while (!LL_USART_IsActiveFlag_RXNE(UARTx));
-    *msg_id = LL_USART_ReceiveData8(UARTx) << 0;
-    while (!LL_USART_IsActiveFlag_RXNE(UARTx));
-    *msg_id = LL_USART_ReceiveData8(UARTx) << 0;
-
-    while (!LL_USART_IsActiveFlag_RXNE(UARTx));
-    *length = LL_USART_ReceiveData8(UARTx) << 0;
-
-    for (size_t i = 0; i < *length; i++) {
-        while (!LL_USART_IsActiveFlag_RXNE(UARTx));
-        data[i] = LL_USART_ReceiveData8(UARTx);
+void UARTReceive(uint8_t *data, size_t length) {
+    for (size_t i = 0; i < length; i++) {
+        while (!LL_USART_IsActiveFlag_RXNE(UARTx)) {
+            TimUpdate();
+        }
+        data[0] = LL_USART_ReceiveData8(UARTx);
     }
 }
 

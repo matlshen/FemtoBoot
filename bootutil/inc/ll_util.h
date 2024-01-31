@@ -1,5 +1,7 @@
-#ifndef LL_UTIL
-#define LL_UTIL
+#ifndef LL_UTIL_H_
+#define LL_UTIL_H_
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -7,13 +9,15 @@ extern "C" {
 
 #include "boot_config.h"
 
+void InitializeHardware();
+void DeinitializeHardware();
 void JumpToApp();
 uint32_t VerifySP();
-void ReinitializeHardware();
+void Reset();   // TODO
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LL_UTIL */
+#endif /* LL_UTIL_H_ */

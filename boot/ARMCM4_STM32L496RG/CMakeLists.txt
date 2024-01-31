@@ -69,7 +69,9 @@ set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} \
     -specs=nano.specs \
     -T${CMAKE_CURRENT_SOURCE_DIR}/STM32L496RGTx_FLASH.ld \
-    -Wl,-Map=${PROJECT_NAME}.map,--cref -Wl,--gc-sections"
+    -Wl,--gc-sections \
+    -Wl,-Map=${PROJECT_NAME}.map,--cref \
+    -Wl,--print-memory-usage"
 )
 target_link_libraries(${PROJECT_NAME} c m nosys)
 

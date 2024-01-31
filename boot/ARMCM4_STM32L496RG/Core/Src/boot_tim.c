@@ -3,7 +3,8 @@
 #include "stm32l4xx_ll_tim.h"
 #include "stm32l4xx_ll_bus.h"
 
-volatile uint32_t boot_time_ms = 0;
+uint32_t boot_time_ms = 0;
+uint32_t timeout_ms = BOOT_TIMEOUT_MS;
 
 void TimInit() {
     // Enable TIM2 clock
@@ -34,4 +35,19 @@ void TimUpdate() {
         // If we get here, something went wrong launching app
         LL_TIM_SetCounter(TIM2, 0);
     }
+}
+
+void TimDelay(uint32_t delay_ms) {
+    // Set timeout
+    TimResetTimeout(delay_ms);
+
+    // Wait for timeout
+    while (boot_time_ms < timeout_ms) {
+        TimUpdate();
+    }
+}
+
+void TimResetTimeout(uint32_t timeout_ms) {
+    // Set new timeout
+    timeout_ms = boot_time_ms + timeout_ms;
 }

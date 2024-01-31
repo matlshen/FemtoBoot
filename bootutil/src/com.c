@@ -15,22 +15,42 @@ void ComInit(void) {
     #endif
 }
 
-void ComTransmitPacket(uint16_t msg_id, uint8_t *data, size_t length) {
+void ComTransmit(uint8_t *data, size_t length) {
     #ifdef USE_CAN
-    CANTransmitPacket(msg_id, data, length);
+    CANTransmit(data, length);
     #endif
 
     #ifdef USE_UART
-    UARTTransmitPacket(msg_id, data, length);
+    UARTTransmit(data, length);
     #endif
 }
 
-void ComReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length) {
+void ComReceive(uint8_t *data, size_t length) {
     #ifdef USE_CAN
-    CANReceivePacket(msg_id, data, length);
+    CANReceive(data, length);
     #endif
 
     #ifdef USE_UART
-    UARTReceivePacket(msg_id, data, length);
+    UARTReceive(data, length);
     #endif
+}
+
+void ComTransmitPacket(uint16_t msg_id, uint8_t *data, size_t length) {
+    ComTransmit((uint8_t *)&msg_id, 2);
+    ComTransmit((uint8_t *)&length, 1);
+    ComTransmit(data, length);
+}
+
+void ComReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length) {
+    ComReceive((uint8_t *)msg_id, 2);
+    ComReceive((uint8_t *)length, 1);
+    ComReceive(data, *length);
+}
+
+void ComAck() {
+    ComTransmitPacket(MSG_ID_ACK, NULL, 0);
+}
+
+void ComNack() {
+    ComTransmitPacket(MSG_ID_NACK, NULL, 0);
 }

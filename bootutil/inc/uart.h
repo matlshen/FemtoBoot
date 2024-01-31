@@ -9,8 +9,8 @@ extern "C" {
 #endif
 
 void UARTInit(void);
-void UARTTransmitPacket(uint16_t msg_id, uint8_t *data, size_t length);
-void UARTReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length);
+void UARTTransmit(uint8_t *data, size_t length);
+void UARTReceive(uint8_t *data, size_t length);
 
 
 #ifdef __cplusplus

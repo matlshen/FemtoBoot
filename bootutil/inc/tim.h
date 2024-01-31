@@ -11,10 +11,12 @@ extern "C" {
 #include "boot_config.h"
 #include "ll_util.h"
 
-extern volatile uint32_t boot_time_ms;
+extern uint32_t boot_time_ms;
 
 void TimInit();
 void TimUpdate();
+void TimDelay(uint32_t delay_ms);
+void TimResetTimeout(uint32_t timeout_ms);
 
 
 #ifdef __cplusplus

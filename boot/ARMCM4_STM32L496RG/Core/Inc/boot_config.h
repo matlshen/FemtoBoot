@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+#include "ll_util.h"
+#include "tim.h"
+#include "uart.h"
+#include "com.h"
+#include "boot.h"
+
 #define APP_ADDRESS             0x8004000U
 #define FLASH_START_ADDRESS     0x0800000U
 // FLASH_SIZE already defined in HAL
