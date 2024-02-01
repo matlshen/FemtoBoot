@@ -13,10 +13,11 @@ extern "C" {
 
 extern uint32_t boot_time_ms;
 
-void TimInit();
-void TimUpdate();
-void TimDelay(uint32_t delay_ms);
-void TimResetTimeout(uint32_t timeout_ms);
+void TimerInit(void);
+void TimerUpdate(void);
+void TimerDelay(uint32_t delay_ms);
+void TimerTimeoutReset(uint32_t timeout_ms);
+void TimerReset(void);
 
 
 #ifdef __cplusplus

@@ -4,17 +4,17 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "com_types.h"
+#include "boot_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-boot_status_typedef FlashUnlock();
-boot_status_typedef FlashErase(size_t address, size_t size);
-boot_status_typedef FlashRead(size_t address, void *data, size_t size);
-boot_status_typedef FlashWrite(size_t address, const void *data, size_t size);
-boot_status_typedef FlashLock();
+Boot_StatusTypeDef FlashUnlock();
+Boot_StatusTypeDef FlashErase(size_t address, size_t size);
+Boot_StatusTypeDef FlashRead(size_t address, void *data, size_t size);
+Boot_StatusTypeDef FlashWrite(size_t address, const void *data, size_t size);
+Boot_StatusTypeDef FlashLock();
 
 
 #ifdef __cplusplus

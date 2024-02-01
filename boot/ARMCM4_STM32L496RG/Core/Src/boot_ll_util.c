@@ -41,6 +41,6 @@ void JumpToApp() {
     ResetHandler();
 }
 
-void Reset() {
+inline void HardwareReset() {
     __NVIC_SystemReset();
 }

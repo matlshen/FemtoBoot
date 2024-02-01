@@ -5,8 +5,8 @@
 #include <stddef.h>
 
 #include "com.h"
-#include "com_types.h"
-#include "tim.h"
+#include "boot_types.h"
+#include "timer.h"
 
 #ifdef __cplusplus
 extern "C" {

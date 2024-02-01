@@ -1,5 +1,5 @@
 #include "boot_config.h"
-#include "tim.h"
+#include "timer.h"
 
 #include "stm32l4xx.h"
 #include "stm32l4xx_ll_crs.h"
@@ -34,30 +34,13 @@
  *  -RX: PD2
  *  -TX: PC12
 */
-#if (UART_RX_PIN == PA10) && (UART_TX_PIN == PA9) || \
-    (UART_RX_PIN == PB7) && (UART_TX_PIN == PB6)
-    #define UARTx USART1
-    #define LL_UARTx LL_APB2_GRP1_PERIPH_USART1
-#elif (UART_RX_PIN == PA3) && (UART_TX_PIN == PA2)
-    #define UARTx USART2
-    #define LL_UARTx LL_APB1_GRP1_PERIPH_USART2
-#elif (UART_RX_PIN == PB11) && (UART_TX_PIN == PB10) || \
-        (UART_RX_PIN == PC5) && (UART_TX_PIN == PC4)
-    #define UARTx USART3
-    #define LL_UARTx LL_APB1_GRP1_PERIPH_USART3
-#elif (UART_RX_PIN == PA1) && (UART_TX_PIN == PA0) || \
-        (UART_RX_PIN == PC11) && (UART_TX_PIN == PC10)
-    #define UARTx UART4
-    #define LL_UARTx LL_APB1_GRP1_PERIPH_UART4
-#elif (UART_RX_PIN == PD2) && (UART_TX_PIN == PC12)
-    #define UARTx UART5
-    #define LL_UARTx LL_APB1_GRP1_PERIPH_UART5
-#else
-    #error "Invalid UART pin configuration"
-#endif
+// TODO: Fix this later
+#define UARTx USART2
+#define LL_UARTx LL_APB1_GRP1_PERIPH_USART2
+
 
 // TODO: Support other uart configurations
-void UARTInit(void) {
+Boot_StatusTypeDef UARTInit(void) {
     LL_USART_InitTypeDef USART_InitStruct = {0};
 
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -91,24 +74,48 @@ void UARTInit(void) {
     USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
     USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
     LL_USART_Init(USART2, &USART_InitStruct);
-    LL_USART_ConfigAsyncMode(USART2);
     LL_USART_Enable(USART2);
+
+    // Disable rx to prevent buffer overrun
+    LL_USART_DisableDirectionRx(UARTx);
+
+    return BOOT_OK;
 }
 
-void UARTTransmit(uint8_t *data, size_t length) {
-    for (size_t i = 0; i < length; i++) {
-        while (!LL_USART_IsActiveFlag_TXE(UARTx));
-        LL_USART_TransmitData8(UARTx, data[i]);
+Boot_StatusTypeDef UARTTransmitByte(uint8_t data, uint32_t timeout_ms) {
+    TimerUpdate();
+    uint32_t timeout = boot_time_ms + timeout_ms;
+
+    while (!LL_USART_IsActiveFlag_TXE(UARTx) && boot_time_ms < timeout)
+        TimerUpdate();
+    if (boot_time_ms >= timeout) {
+        return BOOT_TIMEOUT;
     }
+
+    LL_USART_TransmitData8(UARTx, data);
+
+    return BOOT_OK;
 }
 
-void UARTReceive(uint8_t *data, size_t length) {
-    for (size_t i = 0; i < length; i++) {
-        while (!LL_USART_IsActiveFlag_RXNE(UARTx)) {
-            TimUpdate();
-        }
-        data[0] = LL_USART_ReceiveData8(UARTx);
+Boot_StatusTypeDef UARTReceiveByte(uint8_t *data,  uint32_t timeout_ms) {
+    // Enable rx
+    LL_USART_EnableDirectionRx(UARTx);
+
+    TimerUpdate();
+    uint32_t timeout = boot_time_ms + timeout_ms;
+
+    while (!LL_USART_IsActiveFlag_RXNE(UARTx) && boot_time_ms < timeout)
+        TimerUpdate();
+    if (boot_time_ms >= timeout) {
+        return BOOT_TIMEOUT;
     }
+
+    *data = LL_USART_ReceiveData8(UARTx);
+
+    // Disable rx to prevent buffer overrun
+    LL_USART_DisableDirectionRx(UARTx);
+
+    return BOOT_OK;
 }
 
 #endif // USE_UART

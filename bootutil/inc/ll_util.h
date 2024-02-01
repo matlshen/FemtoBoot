@@ -12,7 +12,7 @@ extern "C" {
 void InitializeHardware();
 void DeinitializeHardware();
 void JumpToApp();
-void Reset();
+void HardwareReset();
 
 
 #ifdef __cplusplus

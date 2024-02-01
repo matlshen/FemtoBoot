@@ -4,20 +4,23 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "com_types.h"
-#include "tim.h"
+#include "boot_types.h"
+#include "timer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void ComInit(void);
-inline void ComTransmit(uint8_t *data, size_t length);
-inline void ComReceive(uint8_t *data, size_t length);
-void ComTransmitPacket(uint16_t msg_id, uint8_t *data, size_t length);
-void ComReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length);
-void ComAck();
-void ComNack();
+#define BYTE_TIMEOUT_MS 500
+#define MAX_TIMEOUT_MS  __UINT32_MAX__
+
+Boot_StatusTypeDef ComInit(void);
+Boot_StatusTypeDef ComTransmitByte(uint8_t data, uint32_t timeout_ms);
+Boot_StatusTypeDef ComReceiveByte(uint8_t *data, uint32_t timeout_ms);
+Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, size_t length);
+Boot_StatusTypeDef ComReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length);
+Boot_StatusTypeDef ComAck();
+Boot_StatusTypeDef ComNack();
 
 
 #ifdef __cplusplus

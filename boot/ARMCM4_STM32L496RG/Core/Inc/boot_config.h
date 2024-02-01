@@ -5,12 +5,6 @@
 extern "C" {
 #endif
 
-#include "ll_util.h"
-#include "tim.h"
-#include "uart.h"
-#include "com.h"
-#include "boot.h"
-
 #define APP_ADDRESS             0x8004000U
 #define FLASH_START_ADDRESS     0x0800000U
 // FLASH_SIZE already defined in HAL
@@ -18,8 +12,8 @@ extern "C" {
 #define SRAM_START_ADDRESS      0x20000000U
 #define SRAM_SIZE               0x00060000U
 
-#define BOOT_TIMEOUT_MS         500U
-#define COMMAND_TIMEOUT_MS      1000U
+#define BOOT_TIMEOUT_MS         100000U
+#define COMMAND_TIMEOUT_MS      100000U
 
 #define SYSTEM_CLOCK_MHZ        16U
 
@@ -28,8 +22,8 @@ extern "C" {
 //     #define CAN_TX_PIN      PB9
 //     #define CAN_BAUDRATE    500000
 #define USE_UART
-    #define UART_RX_PIN     PA3
-    #define UART_TX_PIN     PA2
+    #define UART_RX_PIN_PA3
+    #define UART_TX_PIN_PA2
     #define UART_BAUDRATE   115200
 
 

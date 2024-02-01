@@ -3,14 +3,15 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "boot_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void UARTInit(void);
-void UARTTransmit(uint8_t *data, size_t length);
-void UARTReceive(uint8_t *data, size_t length);
+Boot_StatusTypeDef UARTInit(void);
+Boot_StatusTypeDef UARTTransmitByte(uint8_t data, uint32_t timeout_ms);
+Boot_StatusTypeDef UARTReceiveByte(uint8_t *data, uint32_t timeout_ms);
 
 
 #ifdef __cplusplus

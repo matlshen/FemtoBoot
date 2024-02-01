@@ -11,13 +11,19 @@ int main(void)
     SystemClock_Config();
     MX_GPIO_Init();
 
-    TimInit();
+    TimerInit();
     UARTInit();
+
+    uint16_t msg_id = 0x1234;
+    uint8_t data[4] = {0x01, 0x02, 0x03, 0x04};
+    size_t length = 4;
 
     while (1)
     {
-        BootStateMachine();
-        TimUpdate();
+        ComReceivePacket(&msg_id, data, &length);
+        ComTransmitPacket(msg_id, data, length);
+        //BootStateMachine();
+        TimerUpdate();
     }
 }
 

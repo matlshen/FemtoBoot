@@ -1,18 +1,18 @@
 #include "flash.h"
 #include "stm32l4xx.h"
 
-// 2kB flash page size
-#define FLASH_PAGE_SIZE 0x800U
+// 2kB flash page size defined in HAL library
+// #define FLASH_PAGE_SIZE 0x800U
 
 // Buffer for flash writes
 uint8_t flash_buffer[FLASH_PAGE_SIZE];
 
 
-boot_status_typedef FlashUnlock() {
-    return (boot_status_typedef)HAL_FLASH_Unlock();
+Boot_StatusTypeDef FlashUnlock() {
+    return (Boot_StatusTypeDef)HAL_FLASH_Unlock();
 }
 
-boot_status_typedef FlashErase(size_t address, size_t size) {
+Boot_StatusTypeDef FlashErase(size_t address, size_t size) {
     // Return if address does not align with page
     if (address % FLASH_PAGE_SIZE != 0) {
         return BOOT_ERROR;
@@ -29,8 +29,10 @@ boot_status_typedef FlashErase(size_t address, size_t size) {
     erase_init.Page = address;
     erase_init.NbPages = size;
     HAL_FLASHEx_Erase(&erase_init, &error);
+
+    return BOOT_ERROR;
 }
 
-boot_status_typedef FlashLock() {
-    return (boot_status_typedef)HAL_FLASH_Lock();
+Boot_StatusTypeDef FlashLock() {
+    return (Boot_StatusTypeDef)HAL_FLASH_Lock();
 }
