@@ -12,8 +12,7 @@ extern "C" {
 void InitializeHardware();
 void DeinitializeHardware();
 void JumpToApp();
-uint32_t VerifySP();
-void Reset();   // TODO
+void Reset();
 
 
 #ifdef __cplusplus

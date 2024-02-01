@@ -29,6 +29,8 @@ void BootStateMachine(void) {
             }
             break;
         case SENDING_CONNECTION_PARAMS:
+            // Reset boot timeout
+            TIMResetBootTimeout();
             ComAck();
             for (size_t i = 0; i < NUM_COMMANDS; i++) {
                 ComTransmitPacket(MSG_ID_CONN, (uint8_t *)&valid_commands[i], 2);
@@ -41,6 +43,13 @@ void BootStateMachine(void) {
         case MEM_READ:
             break;
         case MEM_WRITE:
+            break;
+        case VERIFY:
+            break;
+        case RUN:
+            JumpToApp();
+            // If jump fails, go back to waiting for command
+            boot_state = WAITING_FOR_COMMAND;
             break;
         default:
             // Shouldn't get here

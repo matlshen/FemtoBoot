@@ -18,7 +18,7 @@ void DeinitializeHardware() {
 
 void JumpToApp() {
     // Check that stack pointer is a valid address in SRAM
-    if (!VerifySP()) {
+    if (!(*(volatile uint32_t *)APP_ADDRESS >= SRAM_START_ADDRESS && *(volatile uint32_t *)APP_ADDRESS < SRAM_START_ADDRESS + SRAM_SIZE)) {
         return;
     }
 
@@ -41,7 +41,6 @@ void JumpToApp() {
     ResetHandler();
 }
 
-uint32_t VerifySP() {
-    return *(volatile uint32_t *)APP_ADDRESS >= SRAM_START_ADDRESS && *(volatile uint32_t *)APP_ADDRESS < SRAM_START_ADDRESS + SRAM_SIZE;
+void Reset() {
+    __NVIC_SystemReset();
 }
-
