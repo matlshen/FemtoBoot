@@ -14,16 +14,15 @@ int main(void)
     TimerInit();
     UARTInit();
 
-    uint16_t msg_id = 0x1234;
-    uint8_t data[4] = {0x01, 0x02, 0x03, 0x04};
-    size_t length = 4;
+    uint16_t rx_msg_id;
+    uint8_t rx_data[256];
+    size_t rx_length;
 
     while (1)
     {
-        ComReceivePacket(&msg_id, data, &length);
-        ComTransmitPacket(msg_id, data, length);
+        ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BOOT_TIMEOUT_MS);
+        ComTransmitPacket(MSG_ID_CONN, NULL, 0);
         //BootStateMachine();
-        TimerUpdate();
     }
 }
 

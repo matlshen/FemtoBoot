@@ -30,6 +30,7 @@ typedef enum {
     BOOT_OK = 0,
     BOOT_ERROR = -1,
     BOOT_TIMEOUT = -2,
+    BOOT_FORMAT_ERROR = -3,
 } Boot_StatusTypeDef;
 
 #ifdef __cplusplus

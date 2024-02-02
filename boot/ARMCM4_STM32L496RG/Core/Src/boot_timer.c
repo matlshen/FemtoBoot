@@ -4,7 +4,7 @@
 #include "stm32l4xx_ll_bus.h"
 
 uint32_t boot_time_ms = 0;
-uint32_t timeout_ms = BOOT_TIMEOUT_MS;
+uint32_t timeout_time_ms = BOOT_TIMEOUT_MS;
 
 void TimerInit() {
     // Enable TIM2 clock
@@ -25,34 +25,48 @@ void TimerInit() {
     LL_TIM_EnableCounter(TIM2);
 }
 
-void TimerUpdate() {
+Boot_StatusTypeDef TimerUpdate() {
     // Read timer count
     boot_time_ms = TIM2->CNT;
 
-    // Jump to app if timeout
-    if (boot_time_ms > timeout_ms) {
-        JumpToApp();
-        // If we get here, something went wrong launching app
-        LL_TIM_SetCounter(TIM2, 0);
+    // Check if timeout expired
+    if (boot_time_ms > timeout_time_ms) {
+        return BOOT_TIMEOUT;
+    }
+
+    return BOOT_OK;
+}
+
+void TimerSetTimeout(uint32_t timeout_ms) {
+    // Read timer count
+    boot_time_ms = TIM2->CNT;
+
+    timeout_time_ms = boot_time_ms + timeout_ms;
+
+    // If overflow, set to max
+    if (timeout_time_ms < boot_time_ms) {
+        timeout_time_ms = __UINT32_MAX__;
     }
 }
 
 void TimerDelay(uint32_t delay_ms) {
+    // Preserve original timeout
+    uint32_t timeout_store = timeout_time_ms;
+
     // Set timeout
-    TimerTimeoutReset(delay_ms);
+    TimerSetTimeout(delay_ms);
 
     // Wait for timeout
-    while (boot_time_ms < timeout_ms) {
-        TimerUpdate();
+    while (boot_time_ms < timeout_time_ms) {
+        // Read timer count
+        boot_time_ms = TIM2->CNT;
     }
+
+    // Restore timeout
+    timeout_time_ms = timeout_store;
 }
 
-void TimerTimeoutReset(uint32_t timeout_ms) {
-    // Set new timeout
-    timeout_ms = boot_time_ms + timeout_ms;
-}
-
-void TimerReset(void) {
+void TimerDeinit(void) {
     LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_TIM2);
     LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_TIM2);
     LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_TIM2);

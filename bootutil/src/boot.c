@@ -17,6 +17,8 @@ uint8_t rx_data[256];
 size_t rx_length;
 
 typedef enum {
+    INIT,
+    WAITING_FOR_CONNECTION,
     WAITING_FOR_COMMAND,
     CONN_REQ,
     CHANGE_SPEED,
@@ -28,31 +30,95 @@ typedef enum {
     RESET,
 } boot_state_typedef;
 
-static boot_state_typedef boot_state = WAITING_FOR_COMMAND;
+static boot_state_typedef boot_state = WAITING_FOR_CONNECTION;
 static Boot_StatusTypeDef status;
 
 void BootStateMachine(void) {
     switch (boot_state) {
-        case WAITING_FOR_COMMAND:
-            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length);
+        case INIT:
+            // Initialize necessary modules and wait for command from host
+            // InitializeHardware();
+            // TimerInit();
+            // ComInit();
+            boot_state = WAITING_FOR_CONNECTION;
+            break;
+        case WAITING_FOR_CONNECTION:
+            // Wait for connection packet
+            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BOOT_TIMEOUT_MS);
+            // If packet times out, attempt to run application
             if (status == BOOT_TIMEOUT) {
-                // If timeout, go back to waiting for command
-                boot_state = WAITING_FOR_COMMAND;
+                boot_state = RUN;
+            }
+            // For any other error, go back to waiting for connection
+            else if (status != BOOT_OK) {
+                ComNack();
+            }
+            // If packet received, check if it's a connection request
+            else {
+                // If packet received, check if it's a connection request
+                if (rx_msg_id == MSG_ID_CONN) {
+                    ComAck();
+                    boot_state = WAITING_FOR_COMMAND;
+                } else {
+                    ComNack();
+                }
+            }
+
+            break;
+        case WAITING_FOR_COMMAND:
+            // Wait for command packet
+            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BOOT_TIMEOUT_MS);
+            if (status == BOOT_TIMEOUT) {
+                boot_state = RUN;
                 break;
             }
-            if (rx_msg_id == MSG_ID_CONN) {
-                boot_state = CONN_REQ;
-                ComAck();
-            } else {
+            else if (status == BOOT_OK) {
+                switch (rx_msg_id) {
+                    case MSG_ID_CHANGE_SPEED:
+                        ComAck();
+                        boot_state = CHANGE_SPEED;
+                        break;
+                    case MSG_ID_MEM_ERASE:
+                        ComAck();
+                        boot_state = MEM_ERASE;
+                        break;
+                    case MSG_ID_MEM_READ:
+                        ComAck();
+                        boot_state = MEM_READ;
+                        break;
+                    case MSG_ID_MEM_WRITE:
+                        ComAck();
+                        boot_state = MEM_WRITE;
+                        break;
+                    case MSG_ID_VERIFY:
+                        ComAck();
+                        boot_state = VERIFY;
+                        break;
+                    case MSG_ID_RUN:
+                        ComAck();
+                        boot_state = RUN;
+                        break;
+                    case MSG_ID_RESET:
+                        ComAck();
+                        boot_state = RESET;
+                        break;
+                    default:
+                        ComNack();
+                        boot_state = WAITING_FOR_COMMAND;
+                        break;
+                }
+            }
+            else {
                 ComNack();
+                boot_state = WAITING_FOR_COMMAND;
             }
             break;
         case CONN_REQ:
-            // Reset boot timeout
-            TimerTimeoutReset(COMMAND_TIMEOUT_MS);
+            // Send connection parameters
             for (size_t i = 0; i < NUM_COMMANDS; i++) {
-                ComTransmitPacket(MSG_ID_CONN, (uint8_t *)&valid_commands[i], NUM_COMMANDS);
+                ComTransmitPacket(valid_commands[i], NULL, 0);
             }
+            ComAck();
             boot_state = WAITING_FOR_COMMAND;
             break;
         case MEM_ERASE:

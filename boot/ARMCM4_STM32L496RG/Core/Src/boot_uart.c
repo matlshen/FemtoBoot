@@ -83,13 +83,12 @@ Boot_StatusTypeDef UARTInit(void) {
 }
 
 Boot_StatusTypeDef UARTTransmitByte(uint8_t data, uint32_t timeout_ms) {
-    TimerUpdate();
-    uint32_t timeout = boot_time_ms + timeout_ms;
+    TimerSetTimeout(timeout_ms);
 
-    while (!LL_USART_IsActiveFlag_TXE(UARTx) && boot_time_ms < timeout)
-        TimerUpdate();
-    if (boot_time_ms >= timeout) {
-        return BOOT_TIMEOUT;
+    while (!LL_USART_IsActiveFlag_TXE(UARTx)) {
+        if (TimerUpdate() == BOOT_TIMEOUT) {
+            return BOOT_TIMEOUT;
+        }
     }
 
     LL_USART_TransmitData8(UARTx, data);
@@ -101,13 +100,12 @@ Boot_StatusTypeDef UARTReceiveByte(uint8_t *data,  uint32_t timeout_ms) {
     // Enable rx
     LL_USART_EnableDirectionRx(UARTx);
 
-    TimerUpdate();
-    uint32_t timeout = boot_time_ms + timeout_ms;
+    TimerSetTimeout(timeout_ms);
 
-    while (!LL_USART_IsActiveFlag_RXNE(UARTx) && boot_time_ms < timeout)
-        TimerUpdate();
-    if (boot_time_ms >= timeout) {
-        return BOOT_TIMEOUT;
+    while (!LL_USART_IsActiveFlag_RXNE(UARTx)) {
+        if (TimerUpdate() == BOOT_TIMEOUT) {
+            return BOOT_TIMEOUT;
+        }
     }
 
     *data = LL_USART_ReceiveData8(UARTx);

@@ -58,24 +58,24 @@ Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, size_t leng
     return BOOT_OK;
 }
 
-Boot_StatusTypeDef ComReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length) {
+Boot_StatusTypeDef ComReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length, uint32_t timeout_ms) {
     Boot_StatusTypeDef status = BOOT_OK;
 
-    status = ComReceiveByte((uint8_t *)msg_id, MAX_TIMEOUT_MS); 
+    status = ComReceiveByte((uint8_t *)msg_id, timeout_ms); 
     if (status != BOOT_OK)
-        return status;
+        return BOOT_TIMEOUT;
     status = ComReceiveByte(((uint8_t *)msg_id) + 1, BYTE_TIMEOUT_MS);
     if (status != BOOT_OK)
-        return status;
+        return BOOT_FORMAT_ERROR;
 
     status = ComReceiveByte(((uint8_t *)length), BYTE_TIMEOUT_MS);
     if (status != BOOT_OK)
-        return status;
+        return BOOT_FORMAT_ERROR;
 
     for (size_t i = 0; i < *length; i++) {
         status = ComReceiveByte(&data[i], BYTE_TIMEOUT_MS);
         if (status != BOOT_OK)
-            return status;
+            return BOOT_FORMAT_ERROR;
     }
 
     return BOOT_OK;
