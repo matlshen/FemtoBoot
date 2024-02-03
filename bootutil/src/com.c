@@ -5,6 +5,10 @@
     #error "Only one protocol can be used at a time"
 #endif
 
+#ifdef USE_PC_SERIAL
+    #include "serial.h"
+#endif
+
 Boot_StatusTypeDef ComInit(void) {
     #ifdef USE_CAN
     CANInit();
@@ -12,6 +16,24 @@ Boot_StatusTypeDef ComInit(void) {
 
     #ifdef USE_UART
     return UARTInit();
+    #endif
+
+    #ifdef USE_PC_SERIAL
+    return SerialInit(SERIAL_PORT, SERIAL_BAUDRATE);
+    #endif
+}
+
+Boot_StatusTypeDef ComDeInit(void) {
+    #ifdef USE_CAN
+    CANDeinit();
+    #endif
+
+    #ifdef USE_UART
+    return UARTDeinit();
+    #endif
+
+    #ifdef USE_PC_SERIAL
+    return SerialDeinit();
     #endif
 }
 
@@ -23,6 +45,10 @@ inline Boot_StatusTypeDef ComTransmitByte(uint8_t data, uint32_t timeout_ms) {
     #ifdef USE_UART
     return UARTTransmitByte(data, timeout_ms);
     #endif
+
+    #ifdef USE_PC_SERIAL
+    return SerialTransmit(data);
+    #endif
 }
 
 inline Boot_StatusTypeDef ComReceiveByte(uint8_t *data, uint32_t timeout_ms) {
@@ -32,6 +58,10 @@ inline Boot_StatusTypeDef ComReceiveByte(uint8_t *data, uint32_t timeout_ms) {
 
     #ifdef USE_UART
     return UARTReceiveByte(data, timeout_ms);
+    #endif
+
+    #ifdef USE_PC_SERIAL
+    return SerialReceive(data);
     #endif
 }
 
