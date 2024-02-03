@@ -14,15 +14,9 @@ int main(void)
     TimerInit();
     UARTInit();
 
-    uint16_t rx_msg_id;
-    uint8_t rx_data[256];
-    size_t rx_length;
-
     while (1)
     {
-        ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BOOT_TIMEOUT_MS);
-        ComTransmitPacket(MSG_ID_CONN, NULL, 0);
-        //BootStateMachine();
+        BootStateMachine();
     }
 }
 

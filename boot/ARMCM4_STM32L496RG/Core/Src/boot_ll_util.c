@@ -22,14 +22,14 @@ void JumpToApp() {
         return;
     }
 
+    // Get reset handler address
+    pFnResetHandler ResetHandler = (pFnResetHandler)(*(volatile uint32_t *)(APP_ADDRESS + 4));
+
     // Deinitialize hardware
     DeinitializeHardware();
 
     // Set vector table offset
     SCB->VTOR = APP_ADDRESS;
-
-    // Get reset handler address
-    pFnResetHandler ResetHandler = (pFnResetHandler)(*(volatile uint32_t *)(APP_ADDRESS + 4));
     
     // Enable interrupts
     __enable_irq();

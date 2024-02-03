@@ -14,7 +14,7 @@ uint16_t valid_commands[NUM_COMMANDS] = {
 
 uint16_t rx_msg_id;
 uint8_t rx_data[256];
-size_t rx_length;
+uint8_t rx_length;
 
 typedef enum {
     INIT,
@@ -75,31 +75,24 @@ void BootStateMachine(void) {
             else if (status == BOOT_OK) {
                 switch (rx_msg_id) {
                     case MSG_ID_CHANGE_SPEED:
-                        ComAck();
                         boot_state = CHANGE_SPEED;
                         break;
                     case MSG_ID_MEM_ERASE:
-                        ComAck();
                         boot_state = MEM_ERASE;
                         break;
                     case MSG_ID_MEM_READ:
-                        ComAck();
                         boot_state = MEM_READ;
                         break;
                     case MSG_ID_MEM_WRITE:
-                        ComAck();
                         boot_state = MEM_WRITE;
                         break;
                     case MSG_ID_VERIFY:
-                        ComAck();
                         boot_state = VERIFY;
                         break;
                     case MSG_ID_RUN:
-                        ComAck();
                         boot_state = RUN;
                         break;
                     case MSG_ID_RESET:
-                        ComAck();
                         boot_state = RESET;
                         break;
                     default:
