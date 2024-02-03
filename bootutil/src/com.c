@@ -1,4 +1,5 @@
 #include "com.h"
+#include <stddef.h>
 
 // Make sure only one protocol is used at a time
 #if defined(USE_CAN) && defined(USE_UART)
@@ -65,7 +66,7 @@ inline Boot_StatusTypeDef ComReceiveByte(uint8_t *data, uint32_t timeout_ms) {
     #endif
 }
 
-Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, size_t length) {
+Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, uint8_t length) {
     Boot_StatusTypeDef status = BOOT_OK;
 
     status = ComTransmitByte((uint8_t)msg_id, BYTE_TIMEOUT_MS);
@@ -88,7 +89,7 @@ Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, size_t leng
     return BOOT_OK;
 }
 
-Boot_StatusTypeDef ComReceivePacket(uint16_t *msg_id, uint8_t *data, size_t *length, uint32_t timeout_ms) {
+Boot_StatusTypeDef ComReceivePacket(uint16_t *msg_id, uint8_t *data, uint8_t *length, uint32_t timeout_ms) {
     Boot_StatusTypeDef status = BOOT_OK;
 
     status = ComReceiveByte((uint8_t *)msg_id, timeout_ms); 
