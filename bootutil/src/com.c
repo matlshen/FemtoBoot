@@ -6,85 +6,55 @@
     #error "Only one protocol can be used at a time"
 #endif
 
-#ifdef USE_PC_SERIAL
-    #include "serial.h"
+// Ensure that multiple interfaces cannot be defined
+#ifdef USE_UART
+    #include "uart.h"
+    #define INTERFACE_INIT() UARTInit()
+    #define INTERFACE_DEINIT() UARTDeInit()
+    #define INTERFACE_TRANSMIT(X1, X2, X3) UARTTransmit(X1, X2, X3)
+    #define INTERFACE_RECEIVE(X1, X2, X3) UARTReceive(X1, X2, X3)
+#elif defined(USE_PC_SERIAL)
+    #include "win_serial.h"
+    #define INTERFACE_INIT() SerialInit(SERIAL_PORT, 115200)
+    #define INTERFACE_DEINIT() SerialDeInit()
+    // Ignore timeouts for PC serial
+    #define INTERFACE_TRANSMIT(X1, X2, X3) SerialTransmit(X1, X2)
+    #define INTERFACE_RECEIVE(X1, X2, X3) SerialReceive(X1, X2)
 #endif
 
 Boot_StatusTypeDef ComInit(void) {
-    #ifdef USE_CAN
-    CANInit();
-    #endif
-
-    #ifdef USE_UART
-    return UARTInit();
-    #endif
-
-    #ifdef USE_PC_SERIAL
-    return SerialInit(SERIAL_PORT, SERIAL_BAUDRATE);
-    #endif
+    return INTERFACE_INIT();
 }
 
 Boot_StatusTypeDef ComDeInit(void) {
-    #ifdef USE_CAN
-    CANDeinit();
-    #endif
-
-    #ifdef USE_UART
-    return UARTDeinit();
-    #endif
-
-    #ifdef USE_PC_SERIAL
-    return SerialDeinit();
-    #endif
+    return INTERFACE_DEINIT();
 }
 
-inline Boot_StatusTypeDef ComTransmitByte(uint8_t data, uint32_t timeout_ms) {
-    #ifdef USE_CAN
-    CANTransmit(data, length);
-    #endif
-
-    #ifdef USE_UART
-    return UARTTransmitByte(data, timeout_ms);
-    #endif
-
-    #ifdef USE_PC_SERIAL
-    return SerialTransmit(data);
-    #endif
+inline Boot_StatusTypeDef ComTransmit(uint8_t *data, uint8_t length, uint32_t timeout_ms) {
+    return INTERFACE_TRANSMIT(data, length, timeout_ms);
 }
 
-inline Boot_StatusTypeDef ComReceiveByte(uint8_t *data, uint32_t timeout_ms) {
-    #ifdef USE_CAN
-    CANReceive(data, length);
-    #endif
-
-    #ifdef USE_UART
-    return UARTReceiveByte(data, timeout_ms);
-    #endif
-
-    #ifdef USE_PC_SERIAL
-    return SerialReceive(data);
-    #endif
+inline Boot_StatusTypeDef ComReceive(uint8_t *data, uint8_t length, uint32_t timeout_ms) {
+    return INTERFACE_RECEIVE(data, length, timeout_ms);
 }
 
 Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, uint8_t length) {
     Boot_StatusTypeDef status = BOOT_OK;
 
-    status = ComTransmitByte((uint8_t)msg_id, BYTE_TIMEOUT_MS);
-    if (status != BOOT_OK)
-        return status;
-    status = ComTransmitByte((uint8_t)(msg_id >> 8), BYTE_TIMEOUT_MS);
-    if (status != BOOT_OK)
-        return status;
-
-    status = ComTransmitByte((uint8_t)length, BYTE_TIMEOUT_MS);
+    // Transmit the message ID
+    status = ComTransmit((uint8_t *)&msg_id, 2, BYTE_TIMEOUT_MS);
     if (status != BOOT_OK)
         return status;
 
-    for (size_t i = 0; i < length; i++) {
-        status = ComTransmitByte(data[i], BYTE_TIMEOUT_MS);
-        if (status != BOOT_OK)
-            return status;
-    }
+    // Transmit the length
+    status = ComTransmit(&length, 1, BYTE_TIMEOUT_MS);
+    if (status != BOOT_OK)
+        return status;
+
+    // Transmit the data
+    status = ComTransmit(data, length, BYTE_TIMEOUT_MS);
+    if (status != BOOT_OK)
+        return status;
 
     return BOOT_OK;
 }
@@ -92,22 +62,22 @@ Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, uint8_t len
 Boot_StatusTypeDef ComReceivePacket(uint16_t *msg_id, uint8_t *data, uint8_t *length, uint32_t timeout_ms) {
     Boot_StatusTypeDef status = BOOT_OK;
 
-    status = ComReceiveByte((uint8_t *)msg_id, timeout_ms); 
+    // Given timeout only applies to the message ID bytes
+    // All other bytes are expected to be received within BYTE_TIMEOUT_MS
+    // Timeout on other bytes leads to a format error, not timeout error
+    status = ComReceive((uint8_t*)msg_id, 2, timeout_ms);
     if (status != BOOT_OK)
         return BOOT_TIMEOUT;
-    status = ComReceiveByte(((uint8_t *)msg_id) + 1, BYTE_TIMEOUT_MS);
+
+    // Receive the length
+    status = ComReceive((uint8_t*)length, 1, BYTE_TIMEOUT_MS);
     if (status != BOOT_OK)
         return BOOT_FORMAT_ERROR;
 
-    status = ComReceiveByte(((uint8_t *)length), BYTE_TIMEOUT_MS);
+    // Receive the data
+    status = ComReceive(data, *length, BYTE_TIMEOUT_MS);
     if (status != BOOT_OK)
         return BOOT_FORMAT_ERROR;
-
-    for (size_t i = 0; i < *length; i++) {
-        status = ComReceiveByte(&data[i], BYTE_TIMEOUT_MS);
-        if (status != BOOT_OK)
-            return BOOT_FORMAT_ERROR;
-    }
 
     return BOOT_OK;
 }

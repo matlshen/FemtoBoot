@@ -20,7 +20,7 @@ void TimerInit(void);
 Boot_StatusTypeDef TimerUpdate(void);
 void TimerSetTimeout(uint32_t timeout_ms);
 void TimerDelay(uint32_t delay_ms);
-void TimerDeinit(void);
+void TimerDeInit(void);
 
 
 #ifdef __cplusplus

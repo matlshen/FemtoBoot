@@ -9,10 +9,19 @@ extern "C" {
 
 #include "boot_config.h"
 
-void InitializeHardware();
-void DeinitializeHardware();
+void LL_UtilHardwareInit();
+void LL_UtilHardwareDeInit();
+
+void LL_UtilTimerInit();
+uint32_t LL_UtilTimerGetTimeMs();
+void LL_UtilTimerDeInit();
+
 void JumpToApp();
 void HardwareReset();
+
+
+void InitializeHardware();
+void DeinitializeHardware();
 
 
 #ifdef __cplusplus

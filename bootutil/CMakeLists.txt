@@ -9,5 +9,5 @@ target_include_directories(bootutil
 
 target_sources(bootutil
     PRIVATE
-        src/crc32.c
+        src/*.c
 )

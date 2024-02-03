@@ -15,8 +15,8 @@ extern "C" {
 
 Boot_StatusTypeDef ComInit(void);
 Boot_StatusTypeDef ComDeInit(void);
-Boot_StatusTypeDef ComTransmitByte(uint8_t data, uint32_t timeout_ms);
-Boot_StatusTypeDef ComReceiveByte(uint8_t *data, uint32_t timeout_ms);
+Boot_StatusTypeDef ComTransmit(uint8_t *data, uint8_t length, uint32_t timeout_ms);
+Boot_StatusTypeDef ComReceive(uint8_t *data, uint8_t length, uint32_t timeout_ms);
 Boot_StatusTypeDef ComTransmitPacket(uint16_t msg_id, uint8_t *data, uint8_t length);
 Boot_StatusTypeDef ComReceivePacket(uint16_t *msg_id, uint8_t *data, uint8_t *length, uint32_t timeout_ms);
 Boot_StatusTypeDef ComAck();
