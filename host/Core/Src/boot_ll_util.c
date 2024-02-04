@@ -1,5 +1,9 @@
 #include "ll_util.h"
 
+// Hardware functions do nothing, they must exist for boot_ll_util.c to compile,
+void LL_UtilHardwareInit() {}
+void LL_UtilHardwareDeInit() {}
+
 // Timer functions do nothing, they must exist for timer.c to compile,
 // but they are not used in host program
 void LL_UtilTimerInit() {}

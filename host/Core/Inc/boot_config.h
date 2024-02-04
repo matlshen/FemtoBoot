@@ -5,14 +5,20 @@
 extern "C" {
 #endif
 
+#define HOST
+
 #define APP_ADDRESS             0x8004000U
+
+
 #define FLASH_START_ADDRESS     0x0800000U
 // FLASH_SIZE already defined in HAL
 //#define FLASH_SIZE              0x00100000U
 #define SRAM_START_ADDRESS      0x20000000U
 #define SRAM_SIZE               0x00060000U
 
-#define BOOT_TIMEOUT_MS         100000U
+// Timeout for connection upon startup
+#define BOOT_TIMEOUT_MS         500U
+// Timeout for command reception after connection established
 #define COMMAND_TIMEOUT_MS      100000U
 
 #define SYSTEM_CLOCK_MHZ        16U
@@ -26,19 +32,7 @@ extern "C" {
 //     #define UART_TX_PIN_PA2
 //     #define UART_BAUDRATE   115200
 #define USE_PC_SERIAL
-    // yeah idk why Windows is like this
-    #define SERIAL_PORT       "\\\\.\\COM10"
     #define SERIAL_BAUDRATE   115200
-
-
-/* Don't modify anything below this line */
-#ifdef USE_CAN
-    #include "can.h"
-#endif
-
-#ifdef USE_UART
-    #include "uart.h"
-#endif
 
 #ifdef __cplusplus
 }

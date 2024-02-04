@@ -7,7 +7,9 @@
 extern "C" {
 #endif
 
-Boot_StatusTypeDef SerialInit(const char* port, int baudrate);
+extern const char* serial_port;
+
+Boot_StatusTypeDef SerialInit(int baudrate);
 Boot_StatusTypeDef SerialDeInit();
 Boot_StatusTypeDef SerialTransmit(uint8_t *data, uint8_t length);
 Boot_StatusTypeDef SerialReceive(uint8_t *data, uint8_t length);

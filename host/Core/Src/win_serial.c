@@ -3,11 +3,13 @@
 #include <stdio.h>
 #include <windows.h>
 
+const char* serial_port = "\\\\.\\COM10";
+
 HANDLE hSerial;
 
-Boot_StatusTypeDef SerialInit(const char* port, int baudrate) {
+Boot_StatusTypeDef SerialInit(int baudrate) {
     hSerial = CreateFile(
-        port,
+        serial_port,
         GENERIC_READ | GENERIC_WRITE,
         0,
         0,
@@ -17,7 +19,7 @@ Boot_StatusTypeDef SerialInit(const char* port, int baudrate) {
     );
     
     if (hSerial == INVALID_HANDLE_VALUE) {
-        printf("Error: Unable to open serial port %s\n", port);
+        printf("Error: Unable to open serial port %s\n", serial_port);
         return BOOT_ERROR;
     } else {
         printf("Serial port opened successfully\n");
@@ -56,10 +58,10 @@ Boot_StatusTypeDef SerialInit(const char* port, int baudrate) {
 
 Boot_StatusTypeDef SerialDeInit() {
     if (CloseHandle(hSerial)) {
-        printf("Serial port closed successfully\n");
+        //printf("Serial port closed successfully\n");
         return BOOT_OK;
     } else {
-        printf("Error: Unable to close serial port\n");
+        //printf("Error: Unable to close serial port\n");
         return BOOT_ERROR;
     }
 
@@ -71,12 +73,12 @@ Boot_StatusTypeDef SerialTransmit(uint8_t *data, uint8_t length) {
     DWORD bytes_written;
 
     if (!WriteFile(hSerial, data, length, &bytes_written, NULL)) {
-        printf("Error: Unable to write to serial port\n");
+        //printf("Error: Unable to write to serial port\n");
         return BOOT_ERROR;
     }
 
     if (bytes_written != length) {
-        printf("Error: Unable to write all bytes to serial port\n");
+        //printf("Error: Unable to write all bytes to serial port\n");
         return BOOT_ERROR;
     }
 
@@ -87,12 +89,12 @@ Boot_StatusTypeDef SerialReceive(uint8_t *data, uint8_t length) {
     DWORD bytes_read;
 
     if (!ReadFile(hSerial, data, length, &bytes_read, NULL)) {
-        printf("Error: Unable to read from serial port\n");
+        //printf("Error: Unable to read from serial port\n");
         return BOOT_ERROR;
     }
 
     if (bytes_read != length) {
-        printf("Error: Unable to read all bytes from serial port\n");
+        //printf("Error: Unable to read all bytes from serial port\n");
         return BOOT_ERROR;
     }
 

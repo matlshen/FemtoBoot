@@ -15,7 +15,7 @@
     #define INTERFACE_RECEIVE(X1, X2, X3) UARTReceive(X1, X2, X3)
 #elif defined(USE_PC_SERIAL)
     #include "win_serial.h"
-    #define INTERFACE_INIT() SerialInit(SERIAL_PORT, 115200)
+    #define INTERFACE_INIT() SerialInit(115200)
     #define INTERFACE_DEINIT() SerialDeInit()
     // Ignore timeouts for PC serial
     #define INTERFACE_TRANSMIT(X1, X2, X3) SerialTransmit(X1, X2)

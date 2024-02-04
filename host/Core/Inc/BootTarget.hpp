@@ -5,13 +5,13 @@
 
 class BootTarget {
 public:
-    BootTarget(const char* port);
+    BootTarget();
     ~BootTarget();
 
-    void Connect();
+    Boot_StatusTypeDef Connect();
     void Reset();
 private:
     uint16_t msg_id;
     uint8_t msg_data[256];
-    size_t msg_len;
+    uint8_t msg_len;
 };

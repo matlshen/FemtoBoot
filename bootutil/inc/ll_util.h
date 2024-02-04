@@ -12,14 +12,10 @@ extern "C" {
 void LL_UtilHardwareInit();
 void LL_UtilHardwareDeInit();
 
-void LL_UtilTimerInit();
-uint32_t LL_UtilTimerGetTimeMs();
-void LL_UtilTimerDeInit();
-
 void JumpToApp();
 void HardwareReset();
 
-
+// TODO: Deprecated
 void InitializeHardware();
 void DeinitializeHardware();
 

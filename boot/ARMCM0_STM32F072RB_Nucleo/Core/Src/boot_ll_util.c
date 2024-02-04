@@ -40,36 +40,15 @@ void LL_UtilHardwareDeInit() {
     HAL_DeInit();
 }
 
-void LL_UtilTimerInit() {
-    // Enable TIM2 clock
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+void JumpToApp() {
+    // Copy vector table from application address to boot flash minus reset handler
+    // This won't affect bootloader since it doesn't use interrupts
 
-    // Set prescaler to generate 1ms ticks
-    LL_TIM_SetPrescaler(TIM2, __LL_TIM_CALC_PSC(SystemCoreClock, 1000));
-    // Generate an update event to update prescaler value immediately
-    LL_TIM_GenerateEvent_UPDATE(TIM2);
+    // Only do this is MSP in flash does not already match application MSP
 
-    // Set timer to count up
-    LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
+    // Set stack pointer to application address
+    __set_MSP(*(uint32_t *)APP_ADDRESS);
 
-    // Zero timer
-    LL_TIM_SetCounter(TIM2, 0);
-
-    // Enable TIM2 counter
-    LL_TIM_EnableCounter(TIM2);
-}
-
-uint32_t LL_UtilTimerGetTimeMs() {
-    return TIM2->CNT;
-}
-
-void LL_UtilTimerDeInit() {
-    LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_TIM2);
-    LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_TIM2);
-    LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_TIM2);
-
-    // Reset SysTick as well
-    SysTick->CTRL = 0;
-    SysTick->LOAD = 0;
-    SysTick->VAL = 0;
+    // Jump to application
+    ((void (*)(void))(*(uint32_t *)(APP_ADDRESS + 4)))();
 }

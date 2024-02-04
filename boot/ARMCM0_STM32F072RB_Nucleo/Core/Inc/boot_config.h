@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#define TARGET
+
 #define APP_ADDRESS             0x8004000U
 #define FLASH_START_ADDRESS     0x0800000U
 // FLASH_SIZE already defined in HAL

@@ -3,6 +3,7 @@
 #include "timer.h"
 #include "com.h"
 #include "uart.h"
+#include "boot.h"
 
 void SystemClock_Config(void);
 
@@ -20,11 +21,12 @@ int main(void)
 		Boot_StatusTypeDef status = BOOT_OK;
 
     while (1) {
-				status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, 5000);
+        BootStateMachine();
+				// status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, 5000);
 
 
-				if (status == BOOT_OK)
-		        ComTransmitPacket(rx_msg_id, rx_data, rx_length);
+				// if (status == BOOT_OK)
+		    //     ComTransmitPacket(rx_msg_id, rx_data, rx_length);
         //ComTransmit((uint8_t*)"Alive\r\n", 7, 10000);
     }
 }
