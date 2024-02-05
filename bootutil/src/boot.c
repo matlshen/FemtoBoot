@@ -1,5 +1,7 @@
 #include "boot.h"
 
+#include <string.h>
+
 // Array of valid commands
 uint16_t valid_commands[NUM_COMMANDS] = {
     MSG_ID_CONN,
@@ -15,6 +17,9 @@ uint16_t valid_commands[NUM_COMMANDS] = {
 uint16_t rx_msg_id;
 uint8_t rx_data[256];
 uint8_t rx_length;
+
+uint64_t mem_addr;
+uint32_t mem_size;
 
 #ifdef TARGET
 
@@ -74,7 +79,7 @@ void BootStateMachine(void) {
             break;
         case WAITING_FOR_COMMAND:
             // Wait for command packet
-            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BL_TIMEOUT_MS);
+            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, COMMAND_TIMEOUT_MS);
             if (status == BOOT_TIMEOUT) {
                 boot_state = RUN;
                 break;
@@ -122,6 +127,26 @@ void BootStateMachine(void) {
             boot_state = WAITING_FOR_COMMAND;
             break;
         case MEM_ERASE:
+            // Check for message format error
+            if (rx_length != 12) {
+                ComNack();
+                boot_state = WAITING_FOR_COMMAND;
+                break;
+            }
+
+            memcpy(&mem_addr, rx_data, sizeof(mem_addr));
+            memcpy(&mem_size, rx_data+8, sizeof(mem_size));
+
+            // Erase from Flash
+            if (FlashErase(mem_addr, mem_size) == BOOT_OK) {
+                ComAck();
+            } else {
+                ComNack();
+            }
+
+            // Go back to waiting for command
+            boot_state = WAITING_FOR_COMMAND;
+
             break;
         case MEM_READ:
             // Check for message format error
@@ -131,31 +156,20 @@ void BootStateMachine(void) {
                 break;
             }
 
-            uint64_t read_addr = rx_data[7] << 56 | 
-                                rx_data[6] << 48 | 
-                                rx_data[5] << 40 | 
-                                rx_data[4] << 32 | 
-                                rx_data[3] << 24 | 
-                                rx_data[2] << 16 | 
-                                rx_data[1] << 8 | 
-                                rx_data[0];
-            uint32_t read_size = rx_data[11] << 24 | 
-                                rx_data[10] << 16 | 
-                                rx_data[9] << 8 | 
-                                rx_data[8];
+            memcpy(&mem_addr, rx_data, sizeof(mem_addr));
+            memcpy(&mem_size, rx_data+8, sizeof(mem_size));
 
-            // Max read size is 256 bytes
-            if (read_size > 256) {
+            // Max read size is 255 bytes (for now)
+            if (mem_size > 255) {
                 ComNack();
                 boot_state = WAITING_FOR_COMMAND;
                 break;
             }
 
             // Read data from Flash
-						status = FlashRead(read_addr, rx_data, read_size);
-            if (status == BOOT_OK) {
+            if (FlashRead(mem_addr, rx_data, mem_size) == BOOT_OK) {
                 ComAck();
-                ComTransmitPacket(MSG_ID_MEM_READ, rx_data, read_size);
+                ComTransmitPacket(MSG_ID_MEM_READ, rx_data, mem_size);
             } else {
                 ComNack();
             }
@@ -165,6 +179,39 @@ void BootStateMachine(void) {
 
             break;
         case MEM_WRITE:
+            // Check for message format error
+            if (rx_length < 12) {
+                ComNack();
+                boot_state = WAITING_FOR_COMMAND;
+                break;
+            }
+
+            memcpy(&mem_addr, rx_data, sizeof(mem_addr));
+            memcpy(&mem_size, rx_data+8, sizeof(mem_size));
+
+            // Max write size is 255 bytes (for now)
+            if (mem_size > 255) {
+                ComNack();
+                boot_state = WAITING_FOR_COMMAND;
+                break;
+            }
+
+            // Send ACK to signal ready to receive write data
+            ComAck();
+
+            // Receive write data
+            status = ComReceive(rx_data, mem_size, COMMAND_TIMEOUT_MS);
+
+            // Write data to Flash
+            if (FlashWrite(mem_addr, (void*)rx_data, mem_size) == BOOT_OK) {
+                ComAck();
+            } else {
+                ComNack();
+            }
+
+            // Go back to waiting for command
+            boot_state = WAITING_FOR_COMMAND;
+
             break;
         case VERIFY:
             break;

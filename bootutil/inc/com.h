@@ -10,9 +10,6 @@
 extern "C" {
 #endif
 
-#define BYTE_TIMEOUT_MS 500
-#define MAX_TIMEOUT_MS  __UINT32_MAX__
-
 Boot_StatusTypeDef ComInit(void);
 Boot_StatusTypeDef ComDeInit(void);
 Boot_StatusTypeDef ComTransmit(uint8_t *data, uint8_t length, uint32_t timeout_ms);

@@ -12,7 +12,8 @@ extern "C" {
 #include "boot_types.h"
 #include "ll_util.h"
 
-#define MAX_TIMEOUT __UINT32_MAX__
+#define BYTE_TIMEOUT_MS 500
+#define MAX_TIMEOUT_MS  __UINT32_MAX__
 
 extern uint32_t boot_time_ms;
 

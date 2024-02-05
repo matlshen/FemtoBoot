@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 ########################################################################
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../common/arm-cm0.cmake)
 # Choose between Debug and Release builds
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 ########################################################################
 # MCU information
