@@ -14,11 +14,15 @@ int main(void)
     TimerInit();
     ComInit();
 
-    uint16_t rx_msg_id;
-    uint8_t rx_data[256];
-    uint8_t rx_length;
+    uint8_t flash_data[256];
+    uint8_t new_flash_data[8] = {0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF};
 
-		Boot_StatusTypeDef status = BOOT_OK;
+    FlashRead(0x8004000, flash_data, 255);
+    FlashErase(0x8004000, 0x400);
+    FlashWrite(0x8004000, (uint64_t*)new_flash_data, 8);
+    FlashRead(0x8004000, flash_data, 255);
+
+    ComTransmit(flash_data, 255, 10000);
 
     while (1) {
         BootStateMachine();

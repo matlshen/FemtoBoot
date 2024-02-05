@@ -46,7 +46,7 @@ void BootStateMachine(void) {
             break;
         case WAITING_FOR_CONNECTION:
             // Wait for connection packet
-            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BOOT_TIMEOUT_MS);
+            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BL_TIMEOUT_MS);
             // If packet times out, attempt to run application
             if (status == BOOT_TIMEOUT) {
                 boot_state = RUN;
@@ -61,10 +61,10 @@ void BootStateMachine(void) {
                 if (rx_msg_id == MSG_ID_CONN) {
                     ComAck();
                     // Send list of valid commands
-                    for (size_t i = 0; i < NUM_COMMANDS; i++) {
+                    for (size_t i = 0; i < NUM_COMMANDS-5; i++) {
                         ComTransmitPacket(valid_commands[i], NULL, 0);
                     }
-                    //ComAck();
+                    ComAck();
                     boot_state = WAITING_FOR_COMMAND;
                 } else {
                     ComNack();
@@ -74,7 +74,7 @@ void BootStateMachine(void) {
             break;
         case WAITING_FOR_COMMAND:
             // Wait for command packet
-            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BOOT_TIMEOUT_MS);
+            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BL_TIMEOUT_MS);
             if (status == BOOT_TIMEOUT) {
                 boot_state = RUN;
                 break;
@@ -124,6 +124,45 @@ void BootStateMachine(void) {
         case MEM_ERASE:
             break;
         case MEM_READ:
+            // Check for message format error
+            if (rx_length != 12) {
+                ComNack();
+                boot_state = WAITING_FOR_COMMAND;
+                break;
+            }
+
+            uint64_t read_addr = rx_data[7] << 56 | 
+                                rx_data[6] << 48 | 
+                                rx_data[5] << 40 | 
+                                rx_data[4] << 32 | 
+                                rx_data[3] << 24 | 
+                                rx_data[2] << 16 | 
+                                rx_data[1] << 8 | 
+                                rx_data[0];
+            uint32_t read_size = rx_data[11] << 24 | 
+                                rx_data[10] << 16 | 
+                                rx_data[9] << 8 | 
+                                rx_data[8];
+
+            // Max read size is 256 bytes
+            if (read_size > 256) {
+                ComNack();
+                boot_state = WAITING_FOR_COMMAND;
+                break;
+            }
+
+            // Read data from Flash
+						status = FlashRead(read_addr, rx_data, read_size);
+            if (status == BOOT_OK) {
+                ComAck();
+                ComTransmitPacket(MSG_ID_MEM_READ, rx_data, read_size);
+            } else {
+                ComNack();
+            }
+
+            // Go back to waiting for command
+            boot_state = WAITING_FOR_COMMAND;
+
             break;
         case MEM_WRITE:
             break;
@@ -176,7 +215,7 @@ void BootStateMachine(void) {
         case CONNECTING:
             // Send connection request
             ComTransmitPacket(MSG_ID_CONN, NULL, 0);
-            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BOOT_TIMEOUT_MS);
+            status = ComReceivePacket(&rx_msg_id, rx_data, &rx_length, BL_TIMEOUT_MS);
             if (status == BOOT_TIMEOUT) {
                 boot_state = DONE;
             }

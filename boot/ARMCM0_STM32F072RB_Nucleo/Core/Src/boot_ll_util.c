@@ -47,8 +47,8 @@ void JumpToApp() {
     // Only do this is MSP in flash does not already match application MSP
 
     // Set stack pointer to application address
-    __set_MSP(*(uint32_t *)APP_ADDRESS);
+    __set_MSP(*(uint32_t *)APP_START_ADDRESS);
 
     // Jump to application
-    ((void (*)(void))(*(uint32_t *)(APP_ADDRESS + 4)))();
+    ((void (*)(void))(*(uint32_t *)(APP_START_ADDRESS + 4)))();
 }

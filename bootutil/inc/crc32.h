@@ -10,7 +10,7 @@ extern "C" {
 
 #define INITIAL_CRC 0x0
 
-uint32_t compute_crc32(const uint8_t *data, size_t length, uint32_t crc);
+uint32_t crc32(const uint8_t *data, size_t length, uint32_t crc);
 
 #ifdef __cplusplus
 }

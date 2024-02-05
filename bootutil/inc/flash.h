@@ -10,11 +10,9 @@
 extern "C" {
 #endif
 
-Boot_StatusTypeDef FlashUnlock();
 Boot_StatusTypeDef FlashErase(size_t address, size_t size);
 Boot_StatusTypeDef FlashRead(size_t address, void *data, size_t size);
 Boot_StatusTypeDef FlashWrite(size_t address, const void *data, size_t size);
-Boot_StatusTypeDef FlashLock();
 
 
 #ifdef __cplusplus

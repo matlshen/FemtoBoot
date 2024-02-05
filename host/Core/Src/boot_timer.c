@@ -9,7 +9,7 @@ void TimerInit(void) {
     GetSystemTime(&st);
 
     boot_time_ms = (uint32_t)st.wMilliseconds;
-    timeout_time_ms = boot_time_ms + BOOT_TIMEOUT_MS;
+    timeout_time_ms = boot_time_ms + BL_TIMEOUT_MS;
 }
 
 Boot_StatusTypeDef TimerUpdate(void) {

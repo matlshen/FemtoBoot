@@ -5,7 +5,7 @@
 #include "stm32f0xx_ll_tim.h"
 
 uint32_t boot_time_ms = 0;
-uint32_t timeout_time_ms = BOOT_TIMEOUT_MS;
+uint32_t timeout_time_ms = BL_TIMEOUT_MS;
 
 void TimerInit(void) {
     // Enable TIM2 clock

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <stddef.h>
 #include "boot_types.h"
@@ -9,6 +11,9 @@ public:
     ~BootTarget();
 
     Boot_StatusTypeDef Connect();
+    Boot_StatusTypeDef ReadFlash(uint32_t address, uint8_t* buffer, size_t length);
+    Boot_StatusTypeDef EraseFlash(uint32_t address, size_t length);
+    Boot_StatusTypeDef WriteFlash(uint32_t address, uint8_t* buffer, size_t length);
     void Reset();
 private:
     uint16_t msg_id;

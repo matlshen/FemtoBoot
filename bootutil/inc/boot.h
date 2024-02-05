@@ -7,6 +7,7 @@
 #include "com.h"
 #include "boot_types.h"
 #include "timer.h"
+#include "flash.h"
 
 #ifdef __cplusplus
 extern "C" {

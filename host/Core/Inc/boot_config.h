@@ -6,19 +6,22 @@ extern "C" {
 #endif
 
 #define HOST
+// #define TARGET
 
-#define APP_ADDRESS             0x8004000U
+#define APP_START_ADDRESS           0x8004000U
 
+#define BL_FLASH_START_ADDRESS      0x8000000U
+#define BL_FLASH_PAGE_SIZE          0x400
+#define BL_FLASH_SECTOR_SIZE        0x1000
+#define BL_FLASH_SIZE               0x00020000U
+#define BL_FLASH_END_ADDRESS        BL_FLASH_START_ADDRESS + BL_FLASH_SIZE
 
-#define FLASH_START_ADDRESS     0x0800000U
-// FLASH_SIZE already defined in HAL
-//#define FLASH_SIZE              0x00100000U
-#define SRAM_START_ADDRESS      0x20000000U
-#define SRAM_SIZE               0x00060000U
+#define BL_SRAM_START_ADDRESS       0x20000000U
+#define BL_SRAM_SIZE                0x00060000U
 
-// Timeout for connection upon startup
-#define BOOT_TIMEOUT_MS         500U
-// Timeout for command reception after connection established
+// Timeout from startup to jump to application
+#define BL_TIMEOUT_MS           500U
+// Timeout for commands
 #define COMMAND_TIMEOUT_MS      100000U
 
 #define SYSTEM_CLOCK_MHZ        16U
@@ -32,7 +35,8 @@ extern "C" {
 //     #define UART_TX_PIN_PA2
 //     #define UART_BAUDRATE   115200
 #define USE_PC_SERIAL
-    #define SERIAL_BAUDRATE   115200
+    #define PC_SERIAL_BAUDRATE 115200
+
 
 #ifdef __cplusplus
 }

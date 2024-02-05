@@ -20,7 +20,7 @@ set(CMAKE_C_FLAGS
     -mthumb \
     -Wall -fdata-sections -ffunction-sections"
 )
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -Og -g -gdwarf-2")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -O0 -g -gdwarf-2")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -Os -g0")
 set(CMAKE_ASM_FLAGS "-x assembler-with-cpp")
 
