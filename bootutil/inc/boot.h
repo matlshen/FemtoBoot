@@ -8,6 +8,7 @@
 #include "boot_types.h"
 #include "timer.h"
 #include "flash.h"
+#include "crc32.h"
 
 #ifdef __cplusplus
 extern "C" {

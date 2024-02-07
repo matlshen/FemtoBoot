@@ -214,6 +214,18 @@ void BootStateMachine(void) {
 
             break;
         case VERIFY:
+            // Check for message format error
+            if (rx_length != 4) {
+                ComNack();
+                boot_state = WAITING_FOR_COMMAND;
+                break;
+            }
+
+            memcpy(&mem_addr, rx_data, sizeof(mem_addr));
+
+            // Take CRC32 of Flash
+            uint32_t crc = crc32((uint32_t*)APP_START_ADDRESS, (uint32_t*)BL_FLASH_END_ADDRESS, INITIAL_CRC);
+
             break;
         case RUN:
             JumpToApp();
